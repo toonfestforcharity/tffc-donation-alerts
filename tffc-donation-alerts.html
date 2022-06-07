@@ -21,7 +21,8 @@
 			async function checkForNewDonation() {
 				const response = await fetch('https://extra-life.org/api/participants/478114/donations');
 				const data = await response.json();
-				if (typeof data[0].createdDateUTC === 'string') {
+				let createdDateUTC = data[0].createdDateUTC;
+				if (createdDateUTC === 'string') {
 					newDate = new Date(createdDateUTC);
 					oldDate = new Date(latestCreatedDateUTC);
 					if (newDate > oldDate) {
