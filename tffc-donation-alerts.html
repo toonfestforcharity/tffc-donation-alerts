@@ -15,23 +15,38 @@
 		<div id="donation-alert"></div>
 		<script>
 			'use strict';
+
+			const secondsUntilAlertDisappears = 10;
+
 			let latestCreatedDateUTC = null;
 			let oldDate = null;
 			let newDate = null;
+
 			async function checkForNewDonation() {
 				const response = await fetch('https://extra-life.org/api/participants/478114/donations');
 				const data = await response.json();
 				let createdDateUTC = data[0].createdDateUTC;
-				if (createdDateUTC === 'string') {
+				if (typeof createdDateUTC === 'string') {
 					newDate = new Date(createdDateUTC);
 					oldDate = new Date(latestCreatedDateUTC);
 					if (newDate > oldDate) {
-						console.log('New donation found!');
-						console.log(data[0]);
+						showDonationAlert(data[0]);
 					}
 					latestCreatedDateUTC = createdDateUTC;
 				}
   			}
+                        function showDonationAlert(donationObject) {
+                                let donationAlert = document.getElementById('donation-alert');
+				let displayName = 'Someone';
+				if (donationObject.displayName !== undefined) {
+					displayName = donationObject.displayName;
+				}
+                                donationAlert.innerHTML = displayName + ' donated $' + donationObject.amount;
+				setTimeout(function() {
+					donationAlert.innerHTML = '';
+				}, secondsUntilAlertDisappears * 1000);
+                        }
+
 			checkForNewDonation();
 		</script>
 	</body>
