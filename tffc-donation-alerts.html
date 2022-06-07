@@ -16,6 +16,9 @@
 			// Configuration
 			const extraLifeParticipantID = 478114;
 			const secondsUntilAlertDisappears = 10;
+			const checkIntervalInSeconds = 60; // DonorDrive API requests are limited to 15 seconds.
+							   // Let's use 60 seconds, since multiple users will be using this.
+							   // We aren't using etags to check either. So let's not poll too often.
 
 			let latestCreatedDateUTC = null;
 			let oldDate = null;
@@ -47,6 +50,7 @@
                         }
 
 			checkForNewDonation();
+			setInterval(checkForNewDonation, checkIntervalInSeconds * 1000);
 		</script>
 	</body>
 </html>
