@@ -16,27 +16,38 @@
 			// Configuration
 			const extraLifeParticipantID = 478114;
 			const secondsUntilAlertDisappears = 10;
-			const checkIntervalInSeconds = 60; // DonorDrive API requests are limited to 15 seconds.
-							   // Let's use 60 seconds, since multiple users will be using this.
-							   // We aren't using etags to check either. So let's not poll too often.
+			const checkIntervalInSeconds = 30; // DonorDrive API requests are limited to 15 seconds.
+							   // Let's use 30 seconds, since multiple users will be using this.
 
 			let latestCreatedDateUTC = null;
+			let latestParticipantEtag = null;
 			let oldDate = null;
 			let newDate = null;
 
-			async function checkForNewDonation() {
-				const response = await fetch('https://extra-life.org/api/participants/' + extraLifeParticipantID  + '/donations');
-				const data = await response.json();
-				let createdDateUTC = data[0].createdDateUTC;
-				if (typeof createdDateUTC === 'string') {
-					newDate = new Date(createdDateUTC);
-					oldDate = new Date(latestCreatedDateUTC);
-					if (newDate > oldDate) {
-						showDonationAlert(data[0]);
+			async function checkForNewEtag() {
+				const response = await fetch('https://extra-life.org/api/participants/' + extraLifeParticipantID);
+				for (var pair of response.headers.entries()) {
+					if (pair[0] === 'etag') {
+						if (pair[1] !== latestParticipantEtag) {
+							checkForNewDonation();
+						}
+						latestParticipantEtag = pair[1];
 					}
-					latestCreatedDateUTC = createdDateUTC;
 				}
   			}
+			async function checkForNewDonation() {
+                                const response = await fetch('https://extra-life.org/api/participants/'+ extraLifeParticipantID  + '/donations');
+                                const data = await response.json();
+                                let createdDateUTC = data[0].createdDateUTC;
+                                if (typeof createdDateUTC === 'string') {
+                                        newDate = new Date(createdDateUTC);
+                                        oldDate = new Date(latestCreatedDateUTC);
+                                        if (newDate > oldDate) {
+                                                showDonationAlert(data[0]);
+                                        }
+                                        latestCreatedDateUTC = createdDateUTC;
+                                }
+                        }
                         function showDonationAlert(donationObject) {
                                 let donationAlert = document.getElementById('donation-alert');
 				let displayName = 'Someone';
@@ -49,8 +60,8 @@
 				}, secondsUntilAlertDisappears * 1000);
                         }
 
-			checkForNewDonation();
-			setInterval(checkForNewDonation, checkIntervalInSeconds * 1000);
+			checkForNewEtag();
+			setInterval(checkForNewEtag, checkIntervalInSeconds * 1000);
 		</script>
 	</body>
 </html>
