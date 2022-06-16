@@ -58,10 +58,14 @@
       function showDonationAlert (donationObject) {
         const donationAlert = document.getElementById('donation-alert')
         let displayName = 'Someone'
+        let amount = ' made a donation'
         if (donationObject.displayName !== undefined) {
           displayName = donationObject.displayName
         }
-        donationAlert.innerHTML = displayName + ' donated $' + donationObject.amount
+        if (donationObject.amount !== undefined) {
+          amount = ' donated $' + donationObject.amount
+        }
+        donationAlert.innerHTML = displayName + amount
         setTimeout(function () {
           donationAlert.innerHTML = ''
         }, secondsUntilAlertDisappears * 1000)
